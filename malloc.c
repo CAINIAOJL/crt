@@ -63,7 +63,14 @@ void* malloc(unsigned size) {
             header->type = HEAP_BLOCK_USED;
         }
 
-        if()
+        if(header->size > size + HEADER_SIZE * 2) {
+            heap_header* next = (heap_header*)ADDR_ADD(header, size + HEADER_SIZE);
+            next->prev = header;
+            next->next = header->next;
+            next->type = HEAP_BLOCK_USED;
+            
+        }
+        header = header->next;
     }
 
 }
