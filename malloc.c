@@ -22,7 +22,9 @@ typedef struct _heap_header
 static heap_header* list_head = NULL;//关键，总指针
 
 //调用free，这快内存必须是使用的
-void free(void* ptr) {
+void
+free(void* ptr)
+{
     heap_header* header = (heap_header*)ADDR_ADD(ptr, -HEADER_SIZE);
     if(header->type != HEAP_BLOCK_USED) {//并没有使用这块内存区
         return;
@@ -45,7 +47,9 @@ void free(void* ptr) {
     }
 }
 
-void* malloc(unsigned size) {
+void* 
+malloc(unsigned size)
+{
     heap_header* header;
     if(size == 0) {//申请空内存
         return NULL;
@@ -81,7 +85,10 @@ void* malloc(unsigned size) {
 
 #ifdef WIN32
 //linux brk system call
-static int brk(void* end_data_segment) {
+
+static int 
+brk(void* end_data_segment) 
+{
     //brk system call number : 45
     asm("movl $45, %%eax    \n\t"
         "movl %1, %%ebx     \n\t"
@@ -94,7 +101,10 @@ static int brk(void* end_data_segment) {
 #ifdef WIN32
 #include<Windows.h>
 #endif
-int_min_crt_heap_init() {
+
+int 
+mini_crt_heap_init()
+{
     void* base = NULL;
     heap_header* header = NULL;
     unsigned size = 1024 * 1024 * 32;//32MBheap
@@ -137,3 +147,8 @@ flAllocationType:
     list_head->prev = NULL;
     list_head->next = NULL;
 }
+
+/*
+这个文件实现了分配内存的函数malloc和free
+进行了堆的初始化，分别对应windows与linux两个系统
+*/

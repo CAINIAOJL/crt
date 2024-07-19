@@ -8,12 +8,14 @@ extern int main(int argc, char* argv[]);//声明main函数
 void exit(int);//进程退出函数--自实现
 
 //静态函数--报错函数
-static void crt_fatal_error(const char* msg) {
+static void crt_fatal_error(const char* msg)
+{
     printf("fatal error : %s", msg);
     exit(1);
 }
 //程序的真正入口函数
-void min_crt_entry(void) {
+void min_crt_entry(void)
+{
     int ret;
 #ifdef WIN32
     //windows下  
@@ -94,11 +96,13 @@ void min_crt_entry(void) {
 
 #endif
     //初始化堆
-    if(!mini_crt_heap_init()) {
+    if(!mini_crt_heap_init())
+    {
         crt_fatal_error("heap initialize failed!");
     }
     //初始化io
-    if(!mini_crt_io_init()) {
+    if(!mini_crt_io_init())
+    {
         crt_fatal_error("io initialize failed!");
     }
     
