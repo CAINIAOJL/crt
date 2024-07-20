@@ -1,94 +1,23 @@
 #include"minicrt.h"
-/**
- * int n  为要转换为字符的数字
-    char *STR  为转换后的指向字符串的指针
-    int radix  为转换数字的进制数
- */
-char*
-itoa(int n, char* str, int radix)
-{
-    char digit[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    char* p = str;
-    char* head = str;
-    if(!p) {
-        return p;
-    }
-    if(radix < 2 || radix > 36) {
-        return p;
-    }
-    if(radix != 10 && n < 0) {
-        return p;
-    }
-    //处理特殊
-    if(n == 0) {
-        *p++ = '0';
-        *p = '\0';
-        return p;
-    }
-    //十进制，数字为负数
-    if(radix == 10 && n < 0) {
-        *p++ = '-';
-        n = -n;
-    }
-
-    while(n) {
-        *p++ = digit[n % radix];
-        n /= radix;
-    }
-    *p = '\0';//结尾添'\0'
-
-    for(--p; head < p; ++head, --p) {
-        char temp = *head;
-        *head = *p;
-        *p = temp;
-    }
-    return str;
-}
-
-//比较字符串的大小
+#define EOF -1
 int
-strcmp(const char* src, const char* dst) 
+fputc(int c, FILE* stream)
 {
-    int ret = 0;
-    unsigned char* p1 = (unsigned char*) src;
-    unsigned char* p2 = (unsigned char*) dst;
-    while(!(ret = *p2 - *p1) && p2) {
-        p1++;
-        p2++;
+    if(fwrite(&c, 1, 1, stream) != 1) {
+        return EOF;
     }
-    if(ret < 0) {
-        ret = -1;
-    }else if(ret > 0) {
-        ret = 1;
+    return c;
+}
+int 
+fputs(const char* str, FILE* stream)
+{
+    int len = strlen(str);
+    if(fwrite((void*)str, 1, len, stream) != len) {
+        return EOF;
     }
-    return ret;
+    return len;
 }
 
-char*
-strcpy(char* dest, char* src) 
-{
-    char* ret = dest;
-    while(*src) {
-        *dest++ = *src++;
-    }
-    *dest = '\0';
-    return ret;
-}
-
-unsigned
-strlen(const char* str)
-{
-    int cnt = 0;
-    if(!str) {
-        return 0;
-    }
-    for(; *str != '\0'; str++){
-        cnt++;
-    }
-    return cnt;
-}
-
-/*
 #ifndef WIN32
 #define va_list char*
 #define va_start(ap, arg) (ap = (va_list)&arg + sizeof(arg))
@@ -98,7 +27,8 @@ strlen(const char* str)
 #include <Windows.h>
 #endif
 
-int vfprintf(FILE* stream, const char* format, va_list arglist)
+int 
+vfprintf(FILE* stream, const char* format, va_list arglist)
 {
     int translating = 0;
     int ret = 0;
@@ -126,7 +56,7 @@ int vfprintf(FILE* stream, const char* format, va_list arglist)
                     return EOF;
                 }
                 ret += strlen(buf);
-            } esle if(fputc('d', stream) < 0) {
+            } else if(fputc('d', stream) < 0) {
                 return EOF;
             } else {
                 ret++;
@@ -175,6 +105,6 @@ int
 fprintf(FILE* stream, const char* format, ...)
 {
     va_list(arglist);
-    va_start(arglist, foramt);
+    va_start(arglist, format);
     return vfprintf(stream, format, arglist);
-}*/
+}

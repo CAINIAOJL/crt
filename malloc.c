@@ -1,4 +1,5 @@
-#include"mincrt.h"
+#include"minicrt.h"
+#define NULL 0
 
 //双向链表
 typedef struct _heap_header
@@ -72,7 +73,7 @@ malloc(unsigned size)
             next->prev = header;
             next->next = header->next;
             next->type = HEAP_BLOCK_USED;
-            next->size = header - (size - HEADER_SIZE);
+            next->size = header->size - (size - HEADER_SIZE);
             header->next = next;
             header->size = size + HEADER_SIZE;
             header->type = HEAP_BLOCK_USED;
@@ -83,17 +84,17 @@ malloc(unsigned size)
     return NULL;
 }
 
-#ifdef WIN32
+#ifndef WIN32
 //linux brk system call
-
 static int 
 brk(void* end_data_segment) 
 {
+    int ret = 0;
     //brk system call number : 45
     asm("movl $45, %%eax    \n\t"
         "movl %1, %%ebx     \n\t"
         "int $0x80          \n\t"
-        "movl %%eax, $0     \n\t"
+        "movl %%eax, %0     \n\t"
         : "=r"(ret) : "m"(end_data_segment) );
 }
 #endif
@@ -142,10 +143,14 @@ flAllocationType:
 #endif
 
     list_head = (heap_header*)base;
+
     list_head->type = HEAP_BLOCK_FREE;
     list_head->size = size;
     list_head->prev = NULL;
     list_head->next = NULL;
+
+    list_head = header;
+    return 1;
 }
 
 /*

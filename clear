@@ -1,0 +1,4 @@
+//gcc -c -m32 -fno-pie -fno-builtin -nostdlib -fno-stack-protector stdio.c entry.c printf.c malloc.c string.c
+//ar -rs minicrt.a malloc.o printf.o stdio.o string.o
+//gcc -c -m32 -fno-pie -fno-builtin -nostdlib -fno-stack-protector text.c
+//ld -static -m elf_i386 -e min_crt_entry entry.o text.o minicrt.a -o text

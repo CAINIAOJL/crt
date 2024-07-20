@@ -1,7 +1,7 @@
-#include"mincrt.h"
-
+#include"minicrt.h"
+typedef int FILE;
 int 
-min_crt_io_init()
+mini_crt_io_init()
 {
     return 1;
 }
@@ -77,6 +77,7 @@ fseek(FILE* fp, int offset, int set)
 }
 
 #else
+
 static int
 open(const char* pathname, int flags, int mode)
 {
@@ -99,7 +100,7 @@ read(int fd, void* buffer, unsigned size)
         "movl %2, %%ecx   \n\t"
         "movl %3, %%edx   \n\t"
         "int $0x80        \n\t"
-        "movl %eax, %0    \n\t":
+        "movl %%eax, %0    \n\t":
         "=m"(ret):"m"(fd),"m"(buffer),"m"(size));
     return ret;
 }
@@ -113,7 +114,7 @@ write(int fd, const void* buffer, unsigned size)
         "movl %2, %%ecx   \n\t"
         "movl %3, %%edx   \n\t"
         "int $0x80         \n\t"
-        "movl %eax, %0    \n\t":
+        "movl %%eax, %0    \n\t":
         "=m"(ret):"m"(fd),"m"(buffer),"m"(size));
         return ret;
 }
@@ -125,7 +126,7 @@ close(int fd)
     asm("movl $6, %%eax   \n\t"
         "movl %1, %%ebx   \n\t"
         "int $0x80         \n\t"
-        "movl %eax, %0    \n\t":
+        "movl %%eax, %0    \n\t":
         "=m"(ret):"m"(fd));
         return ret;
 }
@@ -139,7 +140,7 @@ seek(int fd, int offset, int mode)
         "movl %2, %%ecx     \n\t"
         "movl %3, %%edx     \n\t"
         "int $0x80          \n\t"
-        "movl %eax, %0      \n\t":
+        "movl %%eax, %0      \n\t":
         "=m"(ret):"m"(fd),"m"(offset),"m"(mode));
         return ret;
 }
@@ -158,19 +159,19 @@ fopen(const char* filename, const char* mode)
     #define O_TRUNC    01000
     #define O_APPEND   02000
 
-    if(strcmp(mode, 'w') == 0) {
+    if(strcmp(mode, "w") == 0) {
         flags |= O_WRONLY | O_CREAT | O_TRUNC;
     }
 
-    if(strcmp(mode, 'w+') == 0) {
+    if(strcmp(mode, "w+") == 0) {
         flags |= O_RDWR | O_CREAT | O_TRUNC;
     }
 
-    if(strcmp(mode, 'r') == 0) {
+    if(strcmp(mode, "r") == 0) {
         flags |= O_RDONLY;
     }
 
-    if(strcmp(mode, 'r+') == 0) {
+    if(strcmp(mode, "r+") == 0) {
         flags |= O_RDWR | O_CREAT;
     }
 
@@ -197,99 +198,9 @@ fclose(FILE* stream)
 }
 
 int
-seek(FILE* stream, int offset, int set)
+fseek(FILE* stream, int offset, int set)
 {   
     return seek((int)stream, offset, set);
 }
 
 #endif
-
-#ifndef WIN32
-#define va_list char*
-#define va_start(ap, arg) (ap = (va_list)&arg + sizeof(arg))
-#define va_arg(ap, t) (*(t*)((ap += sizeof(t)) - sizeof(t)))
-#define va_end(ap) (ap=(va_list)0)
-#else
-#include <Windows.h>
-#endif
-
-int vfprintf(FILE* stream, const char* format, va_list arglist)
-{
-    int translating = 0;
-    int ret = 0;
-    const char* p = '\0';
-    for(p = format; *p != '\0'; ++p) {
-        switch (*p)
-        {
-        case '%':
-            if(!translating) {
-                translating = 1;
-            }else {
-                if(fputc('%', stream) < 0) {
-                    return EOF;
-                }
-                ret++;
-                translating = 0;
-            }
-            break;
-        case 'd':
-            if(translating) {//遇到%d组合
-                char buf[16];
-                translating = 0;
-                itoa(va_arg(arglist, int), buf, 10);
-                if(fputs(buf, stream) < 0) {
-                    return EOF;
-                }
-                ret += strlen(buf);
-            } else if(fputc('d', stream) < 0) {
-                return EOF;
-            } else {
-                ret++;
-            }
-            break;
-
-        case 's'://%s
-            if(translating) {
-                const char* str = va_arg(arglist, const char*);
-                translating = 0;
-                if(fputs(str, stream) < 0) {
-                    return EOF;
-                }
-                ret += strlen(str);
-            } else if(fputc('s', stream) < 0) {
-                return EOF;
-            } else {
-                ret++;
-            } 
-            break;
-        default:
-            if(translating) {
-                translating = 0;
-            }
-            if(fputc(*p, stream) < 0) {
-                return EOF;
-            } else {
-                ret++;
-            }
-            break;
-        }
-    }
-    return ret;
-}
-
-//可变参数函数
-int
-printf(const char* format, ...)
-{
-    va_list(arglist);
-    va_start(arglist, format);
-    return vfprintf(stdout, format, arglist);
-} 
-
-int
-fprintf(FILE* stream, const char* format, ...)
-{
-    va_list(arglist);
-    va_start(arglist, format);
-    return vfprintf(stream, format, arglist);
-}

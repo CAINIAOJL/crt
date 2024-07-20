@@ -1,4 +1,4 @@
-#include"mincrt.h"
+#include"minicrt.h"
 //在windows平台启用
 #ifdef WIN32
 #include<Windows.h>
@@ -17,7 +17,7 @@ static void crt_fatal_error(const char* msg)
 void min_crt_entry(void)
 {
     int ret;
-#ifdef WIN32
+/*#ifdef WIN32
     //windows下  
     int flag = 0;
     int argc = 0;
@@ -45,24 +45,24 @@ void min_crt_entry(void)
     将当前空格字符替换为字符串结束符 '\0'，从而在原字符串中创建新的参数边界。
     指针递增：
         cl++，移动到字符串的下一个字符，继续循环。*/
-    while(*cl) {
-        if(*cl == '\"') {
-            if(flag == 0) {
-                flag = 1;
-            }else {
-                flag = 0;
-            }
-        }else if(*cl == ' ' && flag == 0) {
-            if(*(cl + 1)) {
-                argv[argc] = cl + 1;
-                argc++;
-            }
-            *cl = '\0';
-        }
-        cl++;
-    }
+    //while(*cl) {
+        //if(*cl == '\"') {
+            //if(flag == 0) {
+                //flag = 1;
+            //}else {
+                //flag = 0;
+            //}
+        //}else if(*cl == ' ' && flag == 0) {
+            //if(*(cl + 1)) {
+                //argv[argc] = cl + 1;
+                //argc++;
+            //}
+            //*cl = '\0';
+        //}
+        //cl++;
+    //}
 
-#else
+//#else
     //linux下
     int argc;
     char** argv;
@@ -94,7 +94,7 @@ void min_crt_entry(void)
         argv[i] = base_address[i];
     }*/
 
-#endif
+//#endif
     //初始化堆
     if(!mini_crt_heap_init())
     {
@@ -123,5 +123,4 @@ void exit(int exitcode) {
      "hlt             \n\t"  // 终止处理器执行，通常不会执行到这里，因为进程已经退出
      ::"m"(exitcode));       // 指定输入操作数，"m"表示内存操作数，exitcode是输入值
 #endif
-
 }
